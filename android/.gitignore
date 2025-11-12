@@ -1,0 +1,15 @@
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.cxx
+
+/src/main/jniLibs/*/*.so
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+Makefile

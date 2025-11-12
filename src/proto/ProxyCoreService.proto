@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package ProxyCore;
+
+option go_package = "proxycoreproto/";
+
+// Main gRPC service for controlling multiple proxy cores
+service ProxyCore {
+    rpc startCore (StartCoreRequest) returns (Empty);
+    rpc stopCore (Empty) returns (Empty);
+    rpc isCoreRunning (Empty) returns (BooleanResponse);
+    rpc getVersion (Empty) returns (VersionResponse);
+    rpc fetchLogs (Empty) returns (LogResponse);
+    rpc clearLogs (Empty) returns (Empty);
+    rpc measurePing (MeasurePingRequest) returns (MeasurePingResponse);
+}
+
+// ------------------- Requests -------------------
+
+message StartCoreRequest {
+    string coreName = 1;
+    string dir = 2;
+    string config = 3;
+    int32 memory = 4;
+    bool isString = 5;
+    bool isVpnMode = 6;
+    uint32 tunFD = 7;
+    int32 proxyPort = 8;
+}
+message MeasurePingRequest {
+    repeated string url = 1;
+}
+
+// ------------------- Responses -------------------
+
+message BooleanResponse {
+    bool message = 1;
+}
+
+message VersionResponse {
+    string message = 1;
+}
+
+message LogResponse {
+    string logs = 1;
+}
+
+message MeasurePingResponse {
+    repeated PingResult results = 1;
+}
+
+message PingResult {
+    string url = 1;
+    int64 delay = 2;
+}
+message Empty {}

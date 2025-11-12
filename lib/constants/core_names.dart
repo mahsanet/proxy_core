@@ -1,0 +1,4 @@
+enum CoreNames {
+  xray,
+  outline;
+}

@@ -1,0 +1,70 @@
+name: Build ProxyCoreKit for iOS
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  build-ios-proxykit:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        continue-on-error: true
+
+      - name: Set up Go (if needed)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+        continue-on-error: true
+
+      - name: Install gomobile
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
+
+      - name: Build project
+        run: |
+          cd scripts/
+          ./build_ios_kit.sh
+          mv build/ProxyCoreKit.xcframework.zip ../ProxyCoreKit.xcframework.zip
+          
+      - name: Calculate checksum
+        id: checksum
+        run: |
+          shasum -a 256 ProxyCoreKit.xcframework.zip | cut -d' ' -f1 > checksum.txt
+          echo "checksum=$(cat checksum.txt)" >> $GITHUB_OUTPUT
+
+      - name: Clone ProxyCoreKit
+        uses: actions/checkout@v4
+        with:
+          repository: mahsanet/ProxyCoreKit
+          token: ${{ secrets.PROXYCOREKIT_PAT }}
+          path: ProxyCoreKitRepo
+
+      - name: Update Proxycore.swift with checksum
+        run: |
+          cd ProxyCoreKitRepo
+          # Replace CHECKSUM_PLACEHOLDER in Package.swift
+          sed -e "s/CHECKSUM_PLACEHOLDER/${{ steps.checksum.outputs.checksum }}/" \
+              -e "s/RELEASE_PLACEHOLDER/${GITHUB_REF#refs/tags/}/" \
+              Package.swift.tmp > Package.swift
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add Package.swift
+          git commit -m "Update checksum and release name for new release"
+          git push origin main
+
+      - name: Create Release and Upload ZIP to ProxyCoreKit
+        env:
+          GITHUB_TOKEN: ${{ secrets.PROXYCOREKIT_PAT }}
+        run: |
+          cd ProxyCoreKitRepo
+          NEW_RELEASE=${GITHUB_REF#refs/tags/}
+          cd ..
+          gh release create $NEW_RELEASE ProxyCoreKit.xcframework.zip \
+            --repo mahsanet/ProxyCoreKit \
+            --title "$NEW_RELEASE" \
+            --notes "Automated release from proxy_core $NEW_RELEASE"
