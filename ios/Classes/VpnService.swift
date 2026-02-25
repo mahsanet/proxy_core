@@ -154,7 +154,10 @@ class VpnService: VpnServiceProtocol {
                         completion(.failure(error))
                         return
                     }
+                    os_log("❤️ manager is empty")
+
                 } else {
+                    os_log("❤️❤️ manager is not empty")
                     self._vpnManager = managers.first
                 }
 
@@ -202,11 +205,18 @@ class VpnService: VpnServiceProtocol {
                 guard let manager = _vpnManager else {
                     throw VpnServiceError.managerNotInitialized
                 }
+                try await manager.loadFromPreferences()
 
-                try await enableVPNManager(manager, appName: appName, appTunnelBundle: appTunnelBundle)
-                // Check if VPN is already connected and stop it first
-                try await stopVpnTunnel(manager)
+                try configureVPNManager(
+                    manager, appName: appName, appTunnelBundle: appTunnelBundle)
+                try await manager.saveToPreferences()
                 
+                // Check if VPN is already connected and stop it first
+                if manager.connection.status == .connected || manager.connection.status == .connecting {
+                    manager.connection.stopVPNTunnel()
+                    self.logger.info("Stopping existing connection before reconnecting")
+                    // Add a small delay to ensure the tunnel is fully stopped
+                }
 
                 let options: [String: NSObject] = [
                     "startMode": startMode as NSString,
@@ -217,10 +227,10 @@ class VpnService: VpnServiceProtocol {
                     "config": (config ?? "") as NSString,
                     "cacheDir": (cacheDir ?? "") as NSString,
                 ]
+                try await Task.sleep(nanoseconds: 1_000_000_000) // 1 second delay
 
-                try await Task.sleep(nanoseconds: 1_000_000_000)
+
                 try manager.connection.startVPNTunnel(options: options)
-
                 self.logger.info("VPN tunnel initiation successful")
                 completion(.success(()))
             } catch {

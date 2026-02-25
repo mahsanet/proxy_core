@@ -1,6 +1,6 @@
 name: proxy_core
 description: "Proxy Core plugin for Flutter apps providing xray, singbox and ... implementation"
-version: 7.0.1
+version: 7.0.2
 homepage: none
 
 environment:

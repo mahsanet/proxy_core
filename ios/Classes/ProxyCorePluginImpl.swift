@@ -216,9 +216,12 @@ class ProxyCorePluginIosImpl: NSObject, ProxyCorePluginImpl, FlutterStreamHandle
     private func handleSimpleStop(_ result: @escaping FlutterResult) {
         vpnService.sendTunnelMessage(["command": "SIMPLE_STOP_CORE"]) { response in
             DispatchQueue.main.async {
-                result(response?.lowercased() == "true")
+                let responseValue = response?.lowercased() == "true"
+                result(responseValue)
             }
         }
+        // return true if the core is stopped
+        result(true)
     }
 
     private func handleStartVPN(_ call: FlutterMethodCall, result: @escaping FlutterResult, mode: StartMode) {
@@ -286,6 +289,8 @@ class ProxyCorePluginIosImpl: NSObject, ProxyCorePluginImpl, FlutterStreamHandle
                 result(response?.lowercased() == "true")
             }
         }
+        // return false if the core is not running
+        result(false)
     }
 
     private func handleMeasurePing(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

@@ -1,3 +1,6 @@
+# 7.0.2
+- Fix: iOS Overriding other vpn tunnels (reported bugs)
+
 # 7.0.1
 - Fix: iOS tunnel reconnect delay.
 - Fix: iOS disconnect other vpn managers.
