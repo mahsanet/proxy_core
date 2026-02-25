@@ -53,6 +53,16 @@ abstract interface class ProxyCoreInterface {
   /// Throws [ProxyCoreException] if operation fails
   Future<Empty> clearLogs();
 
+  /// Gets the memory usage of the core
+  /// Returns the memory usage in bytes
+  /// Throws [ProxyCoreException] if operation fails
+  Future<String> getMemoryUsage();
+
+  // Gets CPU usage of the core
+  /// Returns the CPU usage in percentage
+  /// Throws [ProxyCoreException] if operation fails
+  Future<String> getCpuUsage();
+
   /// Ensures a valid initialization state before operations
   void ensureInitialized();
 }

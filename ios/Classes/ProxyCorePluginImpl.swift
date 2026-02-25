@@ -149,6 +149,10 @@ class ProxyCorePluginIosImpl: NSObject, ProxyCorePluginImpl, FlutterStreamHandle
             getTunnelStatus(result)
         case "getVersion":
             handleGetVersion(result)
+        case "getMemoryUsage":
+            handleGetMemoryUsage(result)
+        case "getCpuUsage":
+            handleGetCpuUsage(result)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -349,7 +353,29 @@ class ProxyCorePluginIosImpl: NSObject, ProxyCorePluginImpl, FlutterStreamHandle
             }
         }
     }
-    
+    private func handleGetMemoryUsage(_ result: @escaping FlutterResult) {
+        vpnService.sendTunnelMessage(["command":"GET_MEMORY_USAGE"]){ response in
+            DispatchQueue.main.async {
+                if let memoryUsage = response {
+                    result(memoryUsage)
+                }
+                else{
+                    result(0)
+                }
+            }
+        }
+    }
+    private func handleGetCpuUsage(_ result: @escaping FlutterResult) {
+        vpnService.sendTunnelMessage(["command":"GET_CPU_USAGE"]){ response in
+            DispatchQueue.main.async {
+                if let cpuUsage = response {
+                    result(cpuUsage)
+                }else{
+                    result(0)
+                }
+            }
+        }
+    }
     // MARK: - VPN Status
     private func getTunnelStatus(_ result: @escaping FlutterResult) {
         if VpnService.shared.vpnManager == nil {

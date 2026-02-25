@@ -198,4 +198,15 @@ class ProxyCoreIosVpnImpl implements ProxyCoreInterface {
   Future<void> _simpleStop() async {
     await _invokeMethod('simpleStop', null, 'Simple Stop Core');
   }
+
+  @override
+  Future<String> getMemoryUsage() async {
+    return await _invokeMethod('getMemoryUsage', null, 'get memory usage') ??
+        "0";
+  }
+
+  @override
+  Future<String> getCpuUsage() async {
+    return await _invokeMethod('getCpuUsage', null, 'get cpu usage') ?? "0";
+  }
 }

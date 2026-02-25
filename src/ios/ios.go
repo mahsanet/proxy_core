@@ -3,10 +3,20 @@ package ios
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"strings"
+	"sync"
+	"syscall"
+	"time"
 
 	"segment/proxycoreproto"
 	"segment/server"
+)
+
+var (
+	lastCPUTime time.Duration
+	lastCheck   time.Time
+	cpuMutex    sync.Mutex
 )
 
 // StartGRPCIOS starts the gRPC server used by Flutter+iOS.
@@ -102,4 +112,59 @@ func FetchLogsIOS() string {
 func ClearLogsIOS() {
 	ctx := context.Background()
 	_, _ = server.HandleClearLogs(ctx, &proxycoreproto.Empty{})
+}
+
+// GetMemoryUsageIOS returns the current memory usage of the app in bytes as a string.
+func GetMemoryUsageIOS() string {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return fmt.Sprintf("%d", m.Alloc)
+}
+
+// GetCpuUsageIOS returns the current CPU usage of the app as a percentage (0-100) as a string.
+func GetCpuUsageIOS() string {
+	cpuMutex.Lock()
+	defer cpuMutex.Unlock()
+
+	var rusage syscall.Rusage
+	if err := syscall.Getrusage(syscall.RUSAGE_SELF, &rusage); err != nil {
+		return "-1"
+	}
+
+	userTime := time.Duration(rusage.Utime.Sec)*time.Second + time.Duration(rusage.Utime.Usec)*time.Microsecond
+	sysTime := time.Duration(rusage.Stime.Sec)*time.Second + time.Duration(rusage.Stime.Usec)*time.Microsecond
+	totalCPUTime := userTime + sysTime
+
+	now := time.Now()
+
+	if lastCheck.IsZero() {
+		lastCPUTime = totalCPUTime
+		lastCheck = now
+		return "0"
+	}
+
+	cpuDelta := totalCPUTime - lastCPUTime
+	timeDelta := now.Sub(lastCheck)
+
+	lastCPUTime = totalCPUTime
+	lastCheck = now
+
+	if timeDelta == 0 {
+		return "0"
+	}
+	numCPU := runtime.NumCPU()
+	if numCPU == 0 {
+		numCPU = 1
+	}
+
+	percentage := (cpuDelta.Nanoseconds() * 100) / timeDelta.Nanoseconds()
+
+	if percentage < 0 {
+		return "0"
+	}
+	if percentage > 100*int64(numCPU) {
+		return "100"
+	}
+
+	return fmt.Sprintf("%d", percentage)
 }

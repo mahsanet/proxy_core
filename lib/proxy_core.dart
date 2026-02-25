@@ -163,4 +163,18 @@ class ProxyCore {
   ///
   /// Returns the version string.
   Future<String> get version => _proxyCoreImpl.version;
+
+  /// Gets the memory usage of the core
+  ///
+  /// **iOS**: Queries memory usage via method channel
+  ///
+  /// Returns the memory usage in bytes.
+  Future<String> get memoryUsage => _proxyCoreImpl.getMemoryUsage();
+
+  /// Gets the CPU usage of the core
+  ///
+  /// **iOS**: Queries CPU usage via method channel
+  ///
+  /// Returns the CPU usage in percentage.
+  Future<String> get cpuUsage => _proxyCoreImpl.getCpuUsage();
 }

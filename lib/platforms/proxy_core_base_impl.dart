@@ -122,6 +122,18 @@ class ProxyCoreBaseImpl
       });
 
   @override
+  Future<String> getMemoryUsage() => _executeGrpcOperation(() async {
+        throw ProxyCoreException.message(
+            'Not implemented on ${Platform.operatingSystem}');
+      });
+
+  @override
+  Future<String> getCpuUsage() => _executeGrpcOperation(() async {
+        throw ProxyCoreException.message(
+            'Not implemented on ${Platform.operatingSystem}');
+      });
+
+  @override
   Future<LogResponse> fetchLogs() => _executeGrpcOperation(() async {
         return await _grpcClient.fetchLogs(Empty());
       });
