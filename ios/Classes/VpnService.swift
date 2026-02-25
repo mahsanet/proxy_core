@@ -173,10 +173,14 @@ class VpnService: VpnServiceProtocol {
         }
     }
 
-    private func enableVPNManager(_ manager: NETunnelProviderManager) async throws {
+    private func enableVPNManager(_ manager: NETunnelProviderManager, appName: String, appTunnelBundle: String) async throws {
         do {
-            try await manager.saveToPreferences()
-            try await manager.loadFromPreferences()
+                try await manager.loadFromPreferences()
+                
+                try configureVPNManager(
+                    manager, appName: appName, appTunnelBundle: appTunnelBundle)
+                
+                try await manager.saveToPreferences()
         } catch {
             print(error.localizedDescription)
         }
@@ -198,10 +202,8 @@ class VpnService: VpnServiceProtocol {
                 guard let manager = _vpnManager else {
                     throw VpnServiceError.managerNotInitialized
                 }
-                try configureVPNManager(
-                    manager, appName: appName, appTunnelBundle: appTunnelBundle)
-                try await enableVPNManager(manager)
 
+                try await enableVPNManager(manager, appName: appName, appTunnelBundle: appTunnelBundle)
                 // Check if VPN is already connected and stop it first
                 try await stopVpnTunnel(manager)
                 
@@ -216,7 +218,9 @@ class VpnService: VpnServiceProtocol {
                     "cacheDir": (cacheDir ?? "") as NSString,
                 ]
 
+                try await Task.sleep(nanoseconds: 1_000_000_000)
                 try manager.connection.startVPNTunnel(options: options)
+
                 self.logger.info("VPN tunnel initiation successful")
                 completion(.success(()))
             } catch {

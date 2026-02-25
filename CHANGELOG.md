@@ -1,5 +1,9 @@
+# 7.0.1
+- Fix: iOS tunnel reconnect delay.
+- Fix: iOS disconnect other vpn managers.
+
 # 7.0.0
-- Feature: Added CPU usage monitoring via `getCpuUsage`.
+- Feature: Added CPU usage monitoring via `cpuUsage`.
 - Feature: Added RAM usage monitoring via `memoryUsage`.
 
 ## 6.9.6
