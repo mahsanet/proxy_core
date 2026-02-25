@@ -1,3 +1,6 @@
+# 7.0.3
+- Fix: FDSAN Error changed to warning, for android crash issue.
+
 # 7.0.2
 - Fix: iOS Overriding other vpn tunnels (reported bugs)
 

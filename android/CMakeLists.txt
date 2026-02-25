@@ -1,5 +1,11 @@
 cmake_minimum_required(VERSION 3.10)
 
+# Build fdsan_workaround library
+project(fdsan_workaround C)
+add_library(fdsan_workaround SHARED src/main/cpp/fdsan_workaround.c)
+find_library(log-lib log)
+target_link_libraries(fdsan_workaround ${log-lib} dl)
+
 # Set the root directory where the build script is located
 set(ProxyBuildRoot "${CMAKE_CURRENT_SOURCE_DIR}/../scripts")
 

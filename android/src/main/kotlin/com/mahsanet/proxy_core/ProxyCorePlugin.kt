@@ -40,6 +40,10 @@ class ProxyCorePlugin :
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = binding.applicationContext
+        
+        // Initialize FDSAN workaround early to prevent crashes on Android 10+
+        ProxyCoreApplication.initializeFdsanWorkaround()
+        
         methodChannel = MethodChannel(binding.binaryMessenger, VpnMethods.VPN_METHOD_CHANNEL)
         eventChannel = EventChannel(binding.binaryMessenger, "proxy_core/vpn_events")
 
